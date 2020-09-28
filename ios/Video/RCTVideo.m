@@ -367,6 +367,7 @@ static int const RCTVideoUnset = -1;
       }
         
       _player = [AVPlayer playerWithPlayerItem:_playerItem];
+      [self touchPlayerLayer];
       _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
         
       [_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
@@ -1300,13 +1301,24 @@ static int const RCTVideoUnset = -1;
   }
 }
 
+- (void)touchPlayerLayer
+{
+  if(!_player)return;
+  if(_playerLayer)return;
+
+  _playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
+  _playerLayer.frame = self.bounds;
+  _playerLayer.needsDisplayOnBoundsChange = YES;
+
+  [self.layer addSublayer:_playerLayer];
+  self.layer.needsDisplayOnBoundsChange=YES;
+}
+
 - (void)usePlayerLayer
 {
   if( _player )
   {
-    _playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
-    _playerLayer.frame = self.bounds;
-    _playerLayer.needsDisplayOnBoundsChange = YES;
+    [self touchPlayerLayer];
     
     // to prevent video from being animated when resizeMode is 'cover'
     // resize mode must be set before layer is added
